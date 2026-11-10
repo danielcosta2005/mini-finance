@@ -2,9 +2,10 @@
 name: minifinance-test
 
 services:
-  api:
+  backend:
     build:
-      context: .
+      context: ./backend
+      dockerfile: Dockerfile
       target: development
     init: true
     command: ["node", "--import", "tsx", "src/server.ts"]
@@ -15,7 +16,7 @@ services:
       # Fictitious credentials, exclusive to this disposable test database.
       DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
       INTEGRATION_DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
-      INTEGRATION_API_URL: http://api:3000
+      INTEGRATION_API_URL: http://backend:3000
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,6 +28,8 @@ services:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test-only-placeholder
       POSTGRES_DB: minifinance_test
+    ports:
+      - "127.0.0.1:${TEST_POSTGRES_PORT:-55433}:5432"
     volumes:
       - test-postgres-data:/var/lib/postgresql/data
     healthcheck:

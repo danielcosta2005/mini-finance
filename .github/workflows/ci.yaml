@@ -1,4 +1,4 @@
-name: Backend CI
+name: MiniFinance CI
 
 on:
   push:
@@ -10,9 +10,12 @@ permissions:
 
 jobs:
   quality:
-    name: Quality (${{ matrix.os }})
+    name: Backend quality (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
     strategy:
       fail-fast: false
       matrix:
@@ -23,8 +26,9 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7.1.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: backend/.nvmrc
           cache: npm
+          cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
@@ -45,13 +49,77 @@ jobs:
       - name: Start isolated API and PostgreSQL
         run: docker compose -f compose.test.yaml up --build --detach --wait --wait-timeout 120
       - name: Apply migrations to the test database
-        run: docker compose -f compose.test.yaml exec -T api npm run db:migrate
+        run: docker compose -f compose.test.yaml exec -T backend npm run db:migrate
       # Stage 4 will extend this smoke suite with financial API integration tests.
       - name: Run infrastructure smoke tests
-        run: docker compose -f compose.test.yaml exec -T api npm run test:integration
+        run: docker compose -f compose.test.yaml exec -T backend npm run test:integration
       - name: Show service logs on failure
         if: failure()
         run: docker compose -f compose.test.yaml logs --no-color --tail 100
       - name: Remove disposable test environment
         if: always()
         run: docker compose -f compose.test.yaml down --volumes --remove-orphans
+
+  frontend-quality:
+    name: Frontend quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run build
+
+  frontend-e2e:
+    name: Frontend E2E with real backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test-only-placeholder
+          POSTGRES_DB: minifinance_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test_user -d minifinance_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgresql://test_user:test-only-placeholder@127.0.0.1:5432/minifinance_test
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
