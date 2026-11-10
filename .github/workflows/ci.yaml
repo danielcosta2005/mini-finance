@@ -1,0 +1,57 @@
+name: Backend CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run build
+      - name: V8 coverage
+        if: runner.os == 'Linux'
+        run: npm run test:coverage
+
+  integration:
+    name: Docker integration infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Start isolated API and PostgreSQL
+        run: docker compose -f compose.test.yaml up --build --detach --wait --wait-timeout 120
+      - name: Apply migrations to the test database
+        run: docker compose -f compose.test.yaml exec -T api npm run db:migrate
+      # Stage 4 will extend this smoke suite with financial API integration tests.
+      - name: Run infrastructure smoke tests
+        run: docker compose -f compose.test.yaml exec -T api npm run test:integration
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose -f compose.test.yaml logs --no-color --tail 100
+      - name: Remove disposable test environment
+        if: always()
+        run: docker compose -f compose.test.yaml down --volumes --remove-orphans
