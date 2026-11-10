@@ -1,0 +1,40 @@
+# Use this file alone (-f), never as an override of compose.yaml.
+name: minifinance-test
+
+services:
+  api:
+    build:
+      context: .
+      target: development
+    init: true
+    command: ["node", "--import", "tsx", "src/server.ts"]
+    environment:
+      NODE_ENV: test
+      HOST: 0.0.0.0
+      PORT: "3000"
+      # Fictitious credentials, exclusive to this disposable test database.
+      DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
+      INTEGRATION_DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
+      INTEGRATION_API_URL: http://api:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stop_grace_period: 15s
+
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test-only-placeholder
+      POSTGRES_DB: minifinance_test
+    volumes:
+      - test-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  test-postgres-data:
