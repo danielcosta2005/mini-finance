@@ -17,6 +17,12 @@ import {
 import { createBudgetsRepository } from './modules/budgets/repositories.js';
 import { createBudgetsRoutes } from './modules/budgets/routes.js';
 import { createBudgetsService } from './modules/budgets/services.js';
+import { createCardsRepository } from './modules/cards/repositories.js';
+import {
+  createCardsRoutes,
+  createInvoicesRoutes,
+} from './modules/cards/routes.js';
+import { createCardsService } from './modules/cards/services.js';
 import { createCategoriesRepository } from './modules/categories/repositories.js';
 import { createCategoriesRoutes } from './modules/categories/routes.js';
 import { createCategoriesService } from './modules/categories/services.js';
@@ -48,6 +54,13 @@ export function createApp(dependencies?: AppDependencies) {
     app.route('/api/auth', createAuthRoutes(auth, config));
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));
+    const cards = createCardsService(
+      createCardsRepository(db),
+      clock,
+      config.timeZone,
+    );
+    app.route('/api/cards', createCardsRoutes(cards));
+    app.route('/api/invoices', createInvoicesRoutes(cards));
     app.route(
       '/api/budgets',
       createBudgetsRoutes(createBudgetsService(createBudgetsRepository(db))),
