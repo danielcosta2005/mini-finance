@@ -1,5 +1,20 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794523637309,
+      "tag": "0000_initial_financial_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794523639622,
+      "tag": "0001_financial_integrity",
+      "breakpoints": true
+    }
+  ]
 }
