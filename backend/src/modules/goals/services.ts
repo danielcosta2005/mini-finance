@@ -35,8 +35,12 @@ export function createGoalsService(
       goal.dueOn < today(clock, timeZone) &&
       BigInt(contributedCents) < BigInt(goal.targetCents),
   });
-  const find = async (userId: string, id: string) => {
-    const item = await repo.find(userId, id);
+  const find = async (
+    userId: string,
+    id: string,
+    scope: Pick<GoalsRepository, 'find'> = repo,
+  ) => {
+    const item = await scope.find(userId, id);
     if (!item) throw notFound();
     return item;
   };
@@ -54,9 +58,11 @@ export function createGoalsService(
       return present({ goal, contributedCents: '0' });
     },
     async update(userId: string, id: string, input: UpdateGoal) {
-      const result = await repo.update(userId, id, input, clock.now());
-      if (!result) throw notFound();
-      return present(await find(userId, id));
+      return repo.transaction(async (scope) => {
+        const result = await scope.update(userId, id, input, clock.now());
+        if (!result) throw notFound();
+        return present(await find(userId, id, scope));
+      });
     },
     async delete(userId: string, id: string) {
       if (!(await repo.delete(userId, id))) throw notFound();

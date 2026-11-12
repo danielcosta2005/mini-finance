@@ -1,10 +1,11 @@
 ﻿import { and, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { goalContributions, goals } from '../../db/schema/index.js';
 import type { NewGoal, NewGoalContribution } from '../../db/schema/types.js';
-import type { Database } from '../../db/types.js';
+import type { Database, DbExecutor } from '../../db/types.js';
+import { withTransaction } from '../../shared/transaction.js';
 import type { GoalsQuery, UpdateGoal } from './schemas.js';
 
-export function createGoalsRepository(db: Database) {
+function scoped(db: DbExecutor) {
   const owner = (userId: string, id: string) =>
     and(eq(goals.userId, userId), eq(goals.id, id));
   // Explicit qualification avoids Drizzle's single-table projection dropping the outer table name.
@@ -82,6 +83,14 @@ export function createGoalsRepository(db: Database) {
         db.select({ total: count() }).from(goalContributions).where(where),
       ]);
       return { rows, total: totals[0]?.total ?? 0 };
+    },
+  };
+}
+export function createGoalsRepository(db: Database) {
+  return {
+    ...scoped(db),
+    transaction<T>(work: (scope: ReturnType<typeof scoped>) => Promise<T>) {
+      return withTransaction(db, (tx) => work(scoped(tx)));
     },
   };
 }

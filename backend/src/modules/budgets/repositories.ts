@@ -2,10 +2,11 @@
 import { categories } from '../../db/schema/catalog.js';
 import { budgets } from '../../db/schema/ledger.js';
 import { budgetSpending } from '../../db/schema/views.js';
-import type { DbExecutor } from '../../db/types.js';
+import type { Database, DbExecutor } from '../../db/types.js';
+import { withTransaction } from '../../shared/transaction.js';
 import type { BudgetsQuery, CreateBudget, PatchBudget } from './schemas.js';
 
-export function createBudgetsRepository(db: DbExecutor) {
+function createBudgetsScope(db: DbExecutor) {
   const owned = (userId: string, id: string) =>
     and(eq(budgets.id, id), eq(budgets.userId, userId));
   const spendingJoin = and(
@@ -101,6 +102,16 @@ export function createBudgetsRepository(db: DbExecutor) {
           .where(owned(userId, id))
           .returning({ id: budgets.id })
       )[0];
+    },
+  };
+}
+export function createBudgetsRepository(db: Database) {
+  return {
+    ...createBudgetsScope(db),
+    transaction<T>(
+      work: (scope: ReturnType<typeof createBudgetsScope>) => Promise<T>,
+    ) {
+      return withTransaction(db, (tx) => work(createBudgetsScope(tx)));
     },
   };
 }

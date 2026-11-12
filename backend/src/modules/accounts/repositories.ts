@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, gte, inArray, lte, or } from 'drizzle-orm';
 import { accountBalances, accounts, transfers } from '../../db/schema/index.js';
-import type { Database } from '../../db/types.js';
+import type { Database, DbExecutor } from '../../db/types.js';
 import { notFound } from '../../shared/api-error.js';
 import { withTransaction } from '../../shared/transaction.js';
 import type {
@@ -11,7 +11,7 @@ import type {
   TransfersQuery,
 } from './schemas.js';
 
-export function createAccountsRepository(db: Database) {
+function createAccountsScope(db: DbExecutor) {
   const owns = (userId: string, id: string) =>
     and(eq(accounts.userId, userId), eq(accounts.id, id));
   return {
@@ -33,6 +33,32 @@ export function createAccountsRepository(db: Database) {
           .where(owns(userId, id))
           .limit(1)
       )[0];
+    },
+    async create(userId: string, input: CreateAccount) {
+      return (
+        await db
+          .insert(accounts)
+          .values({ ...input, userId })
+          .returning()
+      )[0];
+    },
+    async update(userId: string, id: string, input: PatchAccount) {
+      return (
+        await db.update(accounts).set(input).where(owns(userId, id)).returning()
+      )[0];
+    },
+  };
+}
+
+export function createAccountsRepository(db: Database) {
+  const owns = (userId: string, id: string) =>
+    and(eq(accounts.userId, userId), eq(accounts.id, id));
+  return {
+    ...createAccountsScope(db),
+    transaction<T>(
+      work: (scope: ReturnType<typeof createAccountsScope>) => Promise<T>,
+    ) {
+      return withTransaction(db, (tx) => work(createAccountsScope(tx)));
     },
     async list(userId: string, query: AccountsQuery) {
       const where = and(
@@ -62,19 +88,6 @@ export function createAccountsRepository(db: Database) {
         .from(accounts)
         .where(where);
       return { rows, total: total?.value ?? 0 };
-    },
-    async create(userId: string, input: CreateAccount) {
-      return (
-        await db
-          .insert(accounts)
-          .values({ ...input, userId })
-          .returning()
-      )[0];
-    },
-    async update(userId: string, id: string, input: PatchAccount) {
-      return (
-        await db.update(accounts).set(input).where(owns(userId, id)).returning()
-      )[0];
     },
     async delete(userId: string, id: string) {
       return (

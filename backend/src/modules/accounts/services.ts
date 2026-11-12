@@ -20,8 +20,12 @@ const presentTransfer = (row: Transfer) => ({
   amountCents: safeCents(row.amountCents),
 });
 export function createAccountsService(repository: AccountsRepository) {
-  async function get(userId: string, id: string) {
-    const row = await repository.get(userId, id);
+  async function get(
+    userId: string,
+    id: string,
+    scope: Pick<AccountsRepository, 'get'> = repository,
+  ) {
+    const row = await scope.get(userId, id);
     if (!row) throw notFound();
     return present(row);
   }
@@ -32,15 +36,18 @@ export function createAccountsService(repository: AccountsRepository) {
       return paginated(result.rows.map(present), result.total, query);
     },
     async create(userId: string, input: CreateAccount) {
-      const row = await repository.create(userId, input);
-      if (!row) throw new Error('Account insert failed');
-      return get(userId, row.id);
+      return repository.transaction(async (scope) => {
+        const row = await scope.create(userId, input);
+        if (!row) throw new Error('Account insert failed');
+        return get(userId, row.id, scope);
+      });
     },
     async update(userId: string, id: string, input: PatchAccount) {
-      await get(userId, id);
-      const row = await repository.update(userId, id, input);
-      if (!row) throw notFound();
-      return get(userId, id);
+      return repository.transaction(async (scope) => {
+        const row = await scope.update(userId, id, input);
+        if (!row) throw notFound();
+        return get(userId, id, scope);
+      });
     },
     async delete(userId: string, id: string) {
       const row = await repository.delete(userId, id);

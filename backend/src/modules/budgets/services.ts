@@ -22,14 +22,22 @@ function present(budget: BudgetWithSpending) {
 }
 
 export function createBudgetsService(repository: BudgetsRepository) {
-  async function categoryReference(userId: string, categoryId: string) {
-    const category = await repository.findCategory(userId, categoryId);
+  async function categoryReference(
+    userId: string,
+    categoryId: string,
+    scope: Pick<BudgetsRepository, 'findCategory'> = repository,
+  ) {
+    const category = await scope.findCategory(userId, categoryId);
     if (!category) throw notFound();
     if (category.type !== 'expense')
       throw businessRule('Orçamentos exigem uma categoria de despesa');
   }
-  async function get(userId: string, id: string) {
-    const budget = await repository.find(userId, id);
+  async function get(
+    userId: string,
+    id: string,
+    scope: Pick<BudgetsRepository, 'find'> = repository,
+  ) {
+    const budget = await scope.find(userId, id);
     if (!budget) throw notFound();
     return present(budget);
   }
@@ -48,23 +56,26 @@ export function createBudgetsService(repository: BudgetsRepository) {
     },
     get,
     async create(userId: string, input: CreateBudget) {
-      await categoryReference(userId, input.categoryId);
-      const budget = await repository.create(userId, input);
-      if (!budget) throw notFound();
-      return get(userId, budget.id);
+      return repository.transaction(async (scope) => {
+        await categoryReference(userId, input.categoryId, scope);
+        const budget = await scope.create(userId, input);
+        if (!budget) throw notFound();
+        return get(userId, budget.id, scope);
+      });
     },
     async update(userId: string, id: string, input: PatchBudget) {
-      const current = await repository.find(userId, id);
-      if (!current) throw notFound();
-      const merged: CreateBudget = {
-        categoryId: input.categoryId ?? current.categoryId,
-        month: input.month ?? current.period.slice(0, 7),
-        limitCents: input.limitCents ?? current.limitCents,
-      };
-      await categoryReference(userId, merged.categoryId);
-      const budget = await repository.update(userId, id, input);
-      if (!budget) throw notFound();
-      return get(userId, budget.id);
+      return repository.transaction(async (scope) => {
+        const current = await scope.find(userId, id);
+        if (!current) throw notFound();
+        await categoryReference(
+          userId,
+          input.categoryId ?? current.categoryId,
+          scope,
+        );
+        const budget = await scope.update(userId, id, input);
+        if (!budget) throw notFound();
+        return get(userId, budget.id, scope);
+      });
     },
     async delete(userId: string, id: string) {
       const budget = await repository.delete(userId, id);
