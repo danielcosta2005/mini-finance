@@ -29,6 +29,9 @@ import { createCategoriesService } from './modules/categories/services.js';
 import { createGoalsRepository } from './modules/goals/repositories.js';
 import { createGoalsRoutes } from './modules/goals/routes.js';
 import { createGoalsService } from './modules/goals/services.js';
+import { createRecurrencesRepository } from './modules/recurrences/repositories.js';
+import { createRecurrencesRoutes } from './modules/recurrences/routes.js';
+import { createRecurrencesService } from './modules/recurrences/services.js';
 import { createTransactionsRepository } from './modules/transactions/repositories.js';
 import { createTransactionsRoutes } from './modules/transactions/routes.js';
 import { createTransactionsService } from './modules/transactions/services.js';
@@ -57,6 +60,16 @@ export function createApp(dependencies?: AppDependencies) {
     app.route('/api/auth', createAuthRoutes(auth, config));
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));
+    app.route(
+      '/api/recurrences',
+      createRecurrencesRoutes(
+        createRecurrencesService(
+          createRecurrencesRepository(db),
+          clock,
+          config.timeZone,
+        ),
+      ),
+    );
     app.route(
       '/api/goals',
       createGoalsRoutes(
