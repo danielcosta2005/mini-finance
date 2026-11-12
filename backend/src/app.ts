@@ -17,6 +17,9 @@ import {
 import { createCategoriesRepository } from './modules/categories/repositories.js';
 import { createCategoriesRoutes } from './modules/categories/routes.js';
 import { createCategoriesService } from './modules/categories/services.js';
+import { createTransactionsRepository } from './modules/transactions/repositories.js';
+import { createTransactionsRoutes } from './modules/transactions/routes.js';
+import { createTransactionsService } from './modules/transactions/services.js';
 import { type Clock, systemClock } from './shared/clock.js';
 import { type ApiEnv, installErrors } from './shared/http.js';
 
@@ -42,6 +45,12 @@ export function createApp(dependencies?: AppDependencies) {
     app.route('/api/auth', createAuthRoutes(auth, config));
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));
+    app.route(
+      '/api/transactions',
+      createTransactionsRoutes(
+        createTransactionsService(createTransactionsRepository(db)),
+      ),
+    );
     app.route('/api/transfers', createTransfersRoutes(accounts));
     app.route(
       '/api/categories',
