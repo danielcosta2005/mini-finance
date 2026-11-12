@@ -2,6 +2,12 @@ import { Hono } from 'hono';
 import type { ApiConfig } from './config/api.js';
 import type { Database } from './db/types.js';
 import { installSecurity } from './middlewares/security.js';
+import { createAccountsRepository } from './modules/accounts/repositories.js';
+import {
+  createAccountsRoutes,
+  createTransfersRoutes,
+} from './modules/accounts/routes.js';
+import { createAccountsService } from './modules/accounts/services.js';
 import { createAuthRepository } from './modules/auth/repositories.js';
 import { createAuthRoutes } from './modules/auth/routes.js';
 import {
@@ -31,6 +37,9 @@ export function createApp(dependencies?: AppDependencies) {
     );
     installSecurity(app, config, auth, clock);
     app.route('/api/auth', createAuthRoutes(auth, config));
+    const accounts = createAccountsService(createAccountsRepository(db));
+    app.route('/api/accounts', createAccountsRoutes(accounts));
+    app.route('/api/transfers', createTransfersRoutes(accounts));
   }
   app.get('/health', (c) => c.json({ status: 'ok' }, 200));
   app.get('/api/health', (c) => c.json({ status: 'ok' }, 200));
