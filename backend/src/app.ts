@@ -14,6 +14,9 @@ import {
   createAuthService,
   type PasswordHasher,
 } from './modules/auth/services.js';
+import { createCategoriesRepository } from './modules/categories/repositories.js';
+import { createCategoriesRoutes } from './modules/categories/routes.js';
+import { createCategoriesService } from './modules/categories/services.js';
 import { type Clock, systemClock } from './shared/clock.js';
 import { type ApiEnv, installErrors } from './shared/http.js';
 
@@ -40,6 +43,12 @@ export function createApp(dependencies?: AppDependencies) {
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));
     app.route('/api/transfers', createTransfersRoutes(accounts));
+    app.route(
+      '/api/categories',
+      createCategoriesRoutes(
+        createCategoriesService(createCategoriesRepository(db)),
+      ),
+    );
   }
   app.get('/health', (c) => c.json({ status: 'ok' }, 200));
   app.get('/api/health', (c) => c.json({ status: 'ok' }, 200));
