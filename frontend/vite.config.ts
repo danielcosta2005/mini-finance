@@ -28,7 +28,6 @@ export default defineConfig(({ mode }) => {
           target: target.data,
           changeOrigin: true,
           cookieDomainRewrite: '',
-          rewrite: (path) => path.replace(/^\/api(?=\/|$)/, ''),
         },
       },
     },

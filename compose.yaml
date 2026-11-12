@@ -7,10 +7,14 @@ services:
       dockerfile: Dockerfile
       target: development
     init: true
+    command: ["sh", "-c", "npm run db:migrate && npm run dev"]
     environment:
       NODE_ENV: development
       HOST: 0.0.0.0
       PORT: "3000"
+      APP_ORIGINS: ${APP_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      APP_TIME_ZONE: ${APP_TIME_ZONE:-America/Sao_Paulo}
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-604800}
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://minifinance:local-only-placeholder@postgres:5432/minifinance}
     ports:
       - "127.0.0.1:${BACKEND_PORT:-3000}:3000"

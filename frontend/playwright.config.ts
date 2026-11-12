@@ -33,6 +33,7 @@ export default defineConfig({
       env: {
         PORT: String(backendPort),
         NODE_ENV: 'test',
+        APP_ORIGINS: frontendUrl,
         DATABASE_URL: databaseUrl,
       },
       timeout: 60_000,
