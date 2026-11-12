@@ -14,6 +14,9 @@ import {
   createAuthService,
   type PasswordHasher,
 } from './modules/auth/services.js';
+import { createBudgetsRepository } from './modules/budgets/repositories.js';
+import { createBudgetsRoutes } from './modules/budgets/routes.js';
+import { createBudgetsService } from './modules/budgets/services.js';
 import { createCategoriesRepository } from './modules/categories/repositories.js';
 import { createCategoriesRoutes } from './modules/categories/routes.js';
 import { createCategoriesService } from './modules/categories/services.js';
@@ -45,6 +48,10 @@ export function createApp(dependencies?: AppDependencies) {
     app.route('/api/auth', createAuthRoutes(auth, config));
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));
+    app.route(
+      '/api/budgets',
+      createBudgetsRoutes(createBudgetsService(createBudgetsRepository(db))),
+    );
     app.route(
       '/api/transactions',
       createTransactionsRoutes(
