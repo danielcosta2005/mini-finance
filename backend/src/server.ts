@@ -1,10 +1,13 @@
 import { serve } from '@hono/node-server';
-import { app } from './app.js';
+import { createApp } from './app.js';
+import { parseApiConfig } from './config/api.js';
 import { parseEnvironment } from './config/env.js';
 import { createDatabase } from './db/client.js';
 
 const env = parseEnvironment();
-const { pool } = createDatabase(env.DATABASE_URL);
+const config = parseApiConfig();
+const { db, pool } = createDatabase(env.DATABASE_URL);
+const app = createApp({ db, config });
 const server = serve(
   { fetch: app.fetch, hostname: env.HOST, port: env.PORT },
   () => {

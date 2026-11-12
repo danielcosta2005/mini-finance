@@ -71,7 +71,8 @@ export function paginated<T>(
   return {
     data,
     pagination: {
-      ...query,
+      page: query.page,
+      pageSize: query.pageSize,
       total,
       totalPages: Math.ceil(total / query.pageSize),
     },
