@@ -35,30 +35,50 @@ jobs:
       - run: npm run test:unit
       - run: npm run build
       - name: V8 coverage
-        if: runner.os == 'Linux'
         run: npm run test:coverage
+      - name: Upload backend test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: backend-quality-${{ matrix.os }}
+          path: |
+            backend/test-reports/*.xml
+            backend/coverage/
+          if-no-files-found: warn
+          retention-days: 14
 
   integration:
-    name: Docker integration infrastructure
+    name: Backend HTTP integration (Linux containers)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - name: Start isolated API and PostgreSQL
-        run: docker compose -f compose.test.yaml up --build --detach --wait --wait-timeout 120
-      - name: Apply migrations to the test database
-        run: docker compose -f compose.test.yaml exec -T backend npm run db:migrate
-      # Stage 4 will extend this smoke suite with financial API integration tests.
-      - name: Run infrastructure smoke tests
-        run: docker compose -f compose.test.yaml exec -T backend npm run test:integration
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: backend/.nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Verify Linux Docker runtime
+        run: docker info --format '{{.OSType}}'
+      - name: Run HTTP tests with Testcontainers-managed Compose
+        run: npm run test:integration
       - name: Show service logs on failure
         if: failure()
-        run: docker compose -f compose.test.yaml logs --no-color --tail 100
-      - name: Remove disposable test environment
+        run: node -e "const fs=require('node:fs');const p='test-reports/containers.log';if(fs.existsSync(p))process.stdout.write(fs.readFileSync(p,'utf8'))"
+      - name: Upload integration reports and container diagnostics
         if: always()
-        run: docker compose -f compose.test.yaml down --volumes --remove-orphans
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: backend-integration-ubuntu
+          path: backend/test-reports/
+          if-no-files-found: warn
+          retention-days: 14
 
   frontend-quality:
     name: Frontend quality (${{ matrix.os }})
