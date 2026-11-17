@@ -16,6 +16,11 @@ CMD ["npm", "run", "dev"]
 FROM development AS build
 RUN npm run build
 
+FROM build AS integration
+ENV NODE_ENV=test
+RUN npm run build:test-server
+CMD ["sh", "-c", "npm run db:migrate && node dist-test/tests/integration/support/server.js"]
+
 FROM base AS production-dependencies
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force

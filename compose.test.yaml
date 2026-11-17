@@ -6,19 +6,19 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: development
+      target: integration
     init: true
-    command: ["node", "--import", "tsx", "src/server.ts"]
     environment:
       NODE_ENV: test
       HOST: 0.0.0.0
       PORT: "3000"
-      APP_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      APP_TIME_ZONE: America/Sao_Paulo
+      APP_ORIGINS: https://finance.example.test
+      APP_TIME_ZONE: UTC
+      TEST_CLOCK_NOW: "2026-03-31T12:00:00.000Z"
       # Fictitious credentials, exclusive to this disposable test database.
       DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
-      INTEGRATION_DATABASE_URL: postgresql://test_user:test-only-placeholder@postgres:5432/minifinance_test
-      INTEGRATION_API_URL: http://backend:3000
+    ports:
+      - "127.0.0.1:${TEST_BACKEND_PORT:-0}:3000"
     depends_on:
       postgres:
         condition: service_healthy

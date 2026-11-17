@@ -17,11 +17,12 @@
     "format": "biome check --write .",
     "check": "npm run typecheck && npm run lint && npm run test:unit",
     "test": "npm run test:unit",
-    "test:unit": "vitest run --project unit",
-    "test:integration": "vitest run --project integration",
-    "test:coverage": "vitest run --project unit --coverage",
+    "test:unit": "vitest run --project unit --reporter=default --reporter=junit --outputFile.junit=test-reports/unit.xml",
+    "test:integration": "vitest run --project integration --reporter=default --reporter=junit --outputFile.junit=test-reports/integration.xml",
+    "test:coverage": "vitest run --project unit --coverage --reporter=default --reporter=junit --outputFile.junit=test-reports/coverage.xml",
     "db:generate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs generate",
-    "db:migrate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs migrate"
+    "db:migrate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs migrate",
+    "build:test-server": "tsc -p tsconfig.integration.json"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {
@@ -42,6 +43,7 @@
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.1.0",
     "drizzle-kit": "0.31.11",
+    "testcontainers": "12.2.1",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.1.0"
