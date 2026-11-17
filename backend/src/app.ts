@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
 import type { ApiConfig } from './config/api.js';
 import type { Database } from './db/types.js';
-import { installSecurity } from './middlewares/security.js';
+import {
+  type AuthRatePolicy,
+  installSecurity,
+} from './middlewares/security.js';
 import { createAccountsRepository } from './modules/accounts/repositories.js';
 import {
   createAccountsRoutes,
@@ -46,6 +49,7 @@ export interface AppDependencies {
   config: ApiConfig;
   clock?: Clock;
   passwordHasher?: PasswordHasher;
+  authRatePolicy?: AuthRatePolicy;
 }
 export function createApp(dependencies?: AppDependencies) {
   const app = new Hono<ApiEnv>({ strict: false });
@@ -59,7 +63,7 @@ export function createApp(dependencies?: AppDependencies) {
       config.sessionTtlSeconds,
       dependencies.passwordHasher,
     );
-    installSecurity(app, config, auth, clock);
+    installSecurity(app, config, auth, clock, dependencies.authRatePolicy);
     app.route('/api/auth', createAuthRoutes(auth, config));
     const accounts = createAccountsService(createAccountsRepository(db));
     app.route('/api/accounts', createAccountsRoutes(accounts));

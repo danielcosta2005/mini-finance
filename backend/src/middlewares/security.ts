@@ -10,11 +10,16 @@ import type { AuthService } from '../modules/auth/services.js';
 import { ApiError } from '../shared/api-error.js';
 import type { Clock } from '../shared/clock.js';
 import type { ApiEnv } from '../shared/http.js';
+export interface AuthRatePolicy {
+  maxAttempts: number;
+  windowMs: number;
+}
 export function installSecurity(
   app: Hono<ApiEnv>,
   config: ApiConfig,
   auth: AuthService,
   clock: Clock,
+  ratePolicy: AuthRatePolicy = { maxAttempts: 20, windowMs: 60000 },
 ) {
   app.use('*', async (c, next) => {
     c.set('requestId', randomUUID());
@@ -82,11 +87,14 @@ export function installSecurity(
         if (entry.until <= now) attempts.delete(key);
       if (!attempts.has(peer) && attempts.size >= 10000)
         throw new ApiError(429, 'RATE_LIMITED', 'Tente novamente mais tarde');
-      const entry = attempts.get(peer) ?? { count: 0, until: now + 60000 };
+      const entry = attempts.get(peer) ?? {
+        count: 0,
+        until: now + ratePolicy.windowMs,
+      };
       entry.count++;
       attempts.set(peer, entry);
-      if (entry.count > 20) {
-        c.header('Retry-After', '60');
+      if (entry.count > ratePolicy.maxAttempts) {
+        c.header('Retry-After', String(Math.ceil(ratePolicy.windowMs / 1000)));
         throw new ApiError(429, 'RATE_LIMITED', 'Tente novamente mais tarde');
       }
     }
