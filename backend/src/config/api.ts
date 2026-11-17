@@ -29,6 +29,7 @@ export function parseApiConfig(
         const url = new URL(value);
         return (
           url.origin !== value ||
+          url.hostname.includes('*') ||
           !['http:', 'https:'].includes(url.protocol) ||
           (production && url.protocol !== 'https:')
         );
