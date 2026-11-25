@@ -11,5 +11,10 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     setupFiles: ['./tests/setup.ts'],
     clearMocks: true,
+    coverage: {
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx'],
+      reporter: ['text', 'html', 'lcov'],
+    },
   },
 });
