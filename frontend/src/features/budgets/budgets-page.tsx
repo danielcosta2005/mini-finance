@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { MonthSelector } from '@/components/layout/month-selector';
 import { list } from '@/lib/api';
 import { currentMonth, formatCurrency, formatPercent } from '@/lib/format';
 import type { Budget, Category } from '@/lib/types';
@@ -57,19 +58,12 @@ export function BudgetsPage() {
   return (
     <>
       <div className="filters">
-        <label htmlFor="budget-month">
-          Mês
-          <input
-            id="budget-month"
-            type="month"
-            value={month}
-            onChange={(event) => setMonth(event.target.value)}
-          />
-        </label>
+        <div className="field">
+          <span className="muted">Mês</span>
+          <MonthSelector label="Mês" value={month} onChange={setMonth} />
+        </div>
       </div>
       <ResourcePage<Budget>
-        title="Orçamentos mensais"
-        description="Acompanhe o limite por categoria de despesa."
         singular="Orçamento"
         path="/budgets"
         fields={fields}

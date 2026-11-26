@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { MonthSelector } from '@/components/layout/month-selector';
 import { api, list } from '@/lib/api';
 import {
   currentDate,
@@ -164,15 +165,14 @@ function CardDetails({ cards }: { cards: Card[] }) {
             ))}
           </select>
         </label>
-        <label htmlFor="invoice-month">
-          Mês da fatura
-          <input
-            id="invoice-month"
-            type="month"
+        <div className="field">
+          <span className="muted">Mês da fatura</span>
+          <MonthSelector
+            label="Mês da fatura"
             value={month}
-            onChange={(event) => setMonth(event.target.value)}
+            onChange={setMonth}
           />
-        </label>
+        </div>
       </div>
       <Feedback message={message} error={purchase.error ?? pay.error} />
       <section className="section">
@@ -404,8 +404,6 @@ function CardDetails({ cards }: { cards: Card[] }) {
 export function CardsPage() {
   return (
     <ResourcePage<Card>
-      title="Cartões de crédito"
-      description="Limites, compras e faturas por mês."
       singular="Cartão"
       path="/cards"
       fields={cardFields}

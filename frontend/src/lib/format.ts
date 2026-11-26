@@ -43,3 +43,46 @@ export const currentMonth = () =>
     .slice(0, 7);
 export const currentDate = () =>
   new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+
+export function formatMonth(value: string): string {
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(value);
+  if (!match) throw new RangeError(`Invalid month: ${value}`);
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
+  return new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
+export function shiftMonth(value: string, amount: number): string {
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(value);
+  if (!match || !Number.isInteger(amount))
+    throw new RangeError(`Invalid month shift: ${value}`);
+  const date = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1 + amount, 1),
+  );
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+export function formatAxisMonth(
+  value: string,
+  index: number,
+  previous?: string,
+): string {
+  const month = formatMonth(value);
+  const monthName = new Intl.DateTimeFormat('pt-BR', {
+    month: 'short',
+    timeZone: 'UTC',
+  })
+    .format(
+      new Date(
+        Date.UTC(Number(value.slice(0, 4)), Number(value.slice(5, 7)) - 1, 1),
+      ),
+    )
+    .replace(/\.$/, '');
+  const yearChanged = previous && previous.slice(0, 4) !== value.slice(0, 4);
+  return index === 0 || yearChanged
+    ? `${monthName} ${month.split(' de ')[1]}`
+    : monthName;
+}

@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { LogoMark } from '@/components/layout/logo-mark';
 import { api } from '@/lib/api';
 import type { User } from '@/lib/types';
 import { Feedback } from '@/shared/ui/resource';
@@ -51,13 +52,14 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   return (
     <main className="auth-shell">
       <div className="auth-box bordered">
-        <div className="wordmark">MiniFinance</div>
+        <div className="wordmark">
+          <LogoMark className="brand-mark" size={20} />
+          <span className="wordmark-name">
+            <span className="wordmark-mini">Mini</span>
+            <span className="wordmark-finance">Finance</span>
+          </span>
+        </div>
         <h1>{mode === 'register' ? 'Criar conta' : 'Entrar'}</h1>
-        <p>
-          {mode === 'register'
-            ? 'Cadastre-se para organizar suas finanças.'
-            : 'Acesse suas informações financeiras.'}
-        </p>
         <form className="form" onSubmit={submit}>
           {mode === 'register' && (
             <div className="field">

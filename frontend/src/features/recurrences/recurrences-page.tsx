@@ -174,8 +174,6 @@ export function RecurrencesPage() {
         </label>
       </div>
       <ResourcePage<Recurrence>
-        title="Recorrências"
-        description="Receitas e despesas previstas. A API gera as movimentações vencidas."
         singular="Recorrência"
         path="/recurrences"
         fields={fields}

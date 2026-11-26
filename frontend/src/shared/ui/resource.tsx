@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { MonthSelector } from '@/components/layout/month-selector';
 import { api, list } from '@/lib/api';
 import { formatCurrency, parseMoney } from '@/lib/format';
 import { ConfirmDialog, Sheet } from './sheet';
@@ -7,7 +8,15 @@ import { ConfirmDialog, Sheet } from './sheet';
 export type FieldSpec = {
   name: string;
   label: string;
-  kind?: 'text' | 'email' | 'date' | 'month' | 'money' | 'number' | 'select' | 'segmented';
+  kind?:
+    | 'text'
+    | 'email'
+    | 'date'
+    | 'month'
+    | 'money'
+    | 'number'
+    | 'select'
+    | 'segmented';
   options?: { value: string; label: string; type?: 'income' | 'expense' }[];
   required?: boolean;
   min?: number;
@@ -36,22 +45,56 @@ export function FormFields({
         <div className="field" key={field.name}>
           <label htmlFor={field.name}>{field.label}</label>
           {field.kind === 'segmented' ? (
-            <div className="segmented" role="group" aria-label={field.label}>
-              {field.options?.map((option) => <button key={option.value} type="button" aria-pressed={values[field.name] === option.value} onClick={() => setValues({ ...values, [field.name]: option.value, categoryId: '' })}>{option.label}</button>)}
-            </div>
+            <fieldset className="segmented">
+              <legend className="visually-hidden">{field.label}</legend>
+              {field.options?.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={values[field.name] === option.value}
+                  onClick={() =>
+                    setValues({
+                      ...values,
+                      [field.name]: option.value,
+                      categoryId: '',
+                    })
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
+            </fieldset>
+          ) : field.kind === 'month' ? (
+            <MonthSelector
+              label={field.label}
+              value={values[field.name] ?? ''}
+              onChange={(value) =>
+                setValues({ ...values, [field.name]: value })
+              }
+            />
           ) : field.kind === 'select' ? (
             <select
               id={field.name}
               value={values[field.name] ?? ''}
               required={field.required !== false}
-              onChange={(event) => setValues({ ...values, [field.name]: event.target.value, ...(field.name === 'type' ? { categoryId: '' } : {}) })}
+              onChange={(event) =>
+                setValues({
+                  ...values,
+                  [field.name]: event.target.value,
+                  ...(field.name === 'type' ? { categoryId: '' } : {}),
+                })
+              }
             >
               <option value="">Selecione</option>
-              {field.options?.filter((option) => !option.type || option.type === values.type).map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              {field.options
+                ?.filter(
+                  (option) => !option.type || option.type === values.type,
+                )
+                .map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
             </select>
           ) : (
             <input
@@ -71,7 +114,16 @@ export function FormFields({
               onChange={(event) =>
                 setValues({ ...values, [field.name]: event.target.value })
               }
-              onBlur={() => { if (field.kind === 'money') { const cents = parseMoney(values[field.name] ?? ''); if (cents !== null) setValues({ ...values, [field.name]: formatCurrency(cents) }); } }}
+              onBlur={() => {
+                if (field.kind === 'money') {
+                  const cents = parseMoney(values[field.name] ?? '');
+                  if (cents !== null)
+                    setValues({
+                      ...values,
+                      [field.name]: formatCurrency(cents),
+                    });
+                }
+              }}
             />
           )}
         </div>
@@ -201,8 +253,6 @@ export function Pagination({
 
 type Item = { id: string };
 export function ResourcePage<T extends Item>({
-  title,
-  description,
   singular,
   path,
   fields,
@@ -215,8 +265,6 @@ export function ResourcePage<T extends Item>({
   createLabel,
   tableClass,
 }: {
-  title: string;
-  description: string;
   singular: string;
   path: string;
   fields: FieldSpec[];
@@ -287,11 +335,7 @@ export function ResourcePage<T extends Item>({
   }
   return (
     <>
-      <div className="page-head">
-        <div>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
+      <div className="resource-actions">
         <button type="button" className="button" onClick={() => open('new')}>
           {createLabel ?? newLabel}
         </button>
@@ -362,7 +406,8 @@ export function ResourcePage<T extends Item>({
             </div>
           ) : (
             <div className="bordered empty">
-              {feminine ? 'Nenhuma' : 'Nenhum'} {singular.toLowerCase()} encontrad{feminine ? 'a' : 'o'}.{' '}
+              {feminine ? 'Nenhuma' : 'Nenhum'} {singular.toLowerCase()}{' '}
+              encontrad{feminine ? 'a' : 'o'}.{' '}
               <button
                 type="button"
                 className="button-link"
@@ -386,9 +431,7 @@ export function ResourcePage<T extends Item>({
           if (!open) setEditing(null);
         }}
         title={
-          editing === 'new'
-            ? newLabel
-            : `Editar ${singular.toLowerCase()}`
+          editing === 'new' ? newLabel : `Editar ${singular.toLowerCase()}`
         }
       >
         <form className="form" onSubmit={submit}>

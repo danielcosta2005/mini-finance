@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><title>MiniFinance</title><path d="M7 30V10l13 14 13-14v20" fill="none" stroke="#0E6F7E" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <title>MiniFinance</title>
+  <style>
+    path { stroke: #0E6F7E; }
+    @media (prefers-color-scheme: dark) { path { stroke: #4FB3C2; } }
+  </style>
+  <path d="M7 30V10l13 14 13-14v20" fill="none" stroke-width="4"
+        stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>

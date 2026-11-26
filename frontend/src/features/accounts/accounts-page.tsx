@@ -138,8 +138,6 @@ export function AccountsPage() {
   });
   return (
     <ResourcePage<Account>
-      title="Contas financeiras"
-      description="Saldos atualizados com lançamentos, transferências e pagamentos."
       singular="Conta"
       path="/accounts"
       fields={fields}

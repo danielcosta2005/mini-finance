@@ -24,6 +24,35 @@ Fluxo de produção: navegador → Nginx `/api/*` → backend `/api/*`.
 PostgreSQL atende o backend pela rede Docker. A rota health é uma verificação
 de vida da API, sem consulta ao banco.
 
+## Design e experiência
+
+O frontend usa IBM Plex Sans e tokens CSS em `frontend/src/styles/globals.css`.
+O layout tem sidebar de 240px no desktop, rail de 56px no tablet e navegação em
+Sheet no mobile. O header tem 56px, título alinhado à esquerda, seletor de mês
+quando aplicável e menu do usuário com iniciais, tema e saída.
+
+O MiniFinance usa neutros com tom petróleo, um acento para marca, navegação,
+links e foco, e cores semânticas separadas para receitas e despesas. Botões
+primários usam `primary`; sinais `+` e `−` e rótulos acompanham os valores.
+O dashboard começa pela faixa de saldo consolidado, receitas e despesas, segue
+com fluxo de caixa e ranking de categorias, depois transações e listas compactas.
+Não há títulos duplicados dentro do conteúdo nem eixos de gráfico sem dados.
+
+| Token | Claro | Escuro |
+| --- | --- | --- |
+| `background` | `#F5F8F8` | `#0C1316` |
+| `foreground` | `#11191D` | `#E6EDEF` |
+| `muted` | `#EBF0F1` | `#17232A` |
+| `accent` | `#0E6F7E` | `#4FB3C2` |
+| `income` | `#1F7A4D` | `#4CC38A` |
+| `expense` | `#A8402F` | `#E0705C` |
+
+As bordas de inputs usam `#7E8B8F` no tema claro e `#607078` no escuro porque
+os valores inicialmente propostos para `input` não atingiam contraste 3:1 sobre
+as superfícies de controles. Os tokens `border` continuam mais sutis para
+separadores e contêineres. A referência completa está em [docs/a.md](docs/a.md),
+seção 4.
+
 ## Docker Compose
 
 Na raiz, copiar `.env.example` para `.env` e executar:

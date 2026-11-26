@@ -39,8 +39,6 @@ export function CategoriesPage() {
         </label>
       </div>
       <ResourcePage<Category>
-        title="Categorias"
-        description="Organize receitas e despesas por nome e tipo."
         singular="Categoria"
         path="/categories"
         fields={fields}

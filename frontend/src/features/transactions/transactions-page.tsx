@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { MonthSelector } from '@/components/layout/month-selector';
 import { list } from '@/lib/api';
 import {
   currentDate,
@@ -70,15 +71,10 @@ export function TransactionsPage() {
   return (
     <>
       <div className="filters">
-        <label htmlFor="tx-month">
-          Mês
-          <input
-            id="tx-month"
-            type="month"
-            value={month}
-            onChange={(event) => setMonth(event.target.value)}
-          />
-        </label>
+        <div className="field">
+          <span className="muted">Mês</span>
+          <MonthSelector label="Mês" value={month} onChange={setMonth} />
+        </div>
         <label htmlFor="tx-type">
           Tipo
           <select
@@ -147,8 +143,6 @@ export function TransactionsPage() {
       </div>
       <ResourcePage<Transaction>
         tableClass="transactions-table"
-        title="Movimentações"
-        description="Receitas e despesas das suas contas."
         singular="Transação"
         createLabel="Nova transação"
         path="/transactions"

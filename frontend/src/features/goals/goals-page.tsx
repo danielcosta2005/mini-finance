@@ -175,8 +175,6 @@ function GoalDetails({ goals }: { goals: Goal[] }) {
 export function GoalsPage() {
   return (
     <ResourcePage<Goal>
-      title="Metas financeiras"
-      description="Acompanhe valores-alvo, prazos e aportes."
       singular="Meta"
       path="/goals"
       fields={fields}

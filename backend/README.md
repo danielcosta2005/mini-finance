@@ -37,6 +37,7 @@ não faz consulta ao banco. `app.ts` não abre porta nem carrega o ambiente do s
 | `test:coverage`      | Cobertura V8 dos unitários                        |
 | `db:generate`        | Gera SQL a partir de `src/db/schema/index.ts`     |
 | `db:migrate`         | Aplica migrations de `drizzle/`                   |
+| `db:seed:demo`       | Cria uma conta fictícia com dados financeiros     |
 
 `dev`, `start` e os comandos de banco carregam `.env` opcionalmente; variáveis do
 processo têm precedência. `DATABASE_URL` é obrigatória; `NODE_ENV` aceita
@@ -81,3 +82,23 @@ docker build --target production -t minifinance-backend:local ./backend
 
 Migrations são uma etapa separada do deploy. Ver a [documentação da raiz](../README.md)
 para configuração Docker, frontend, proxy e execução integrada.
+
+### Conta de demonstração
+
+Depois de configurar `DATABASE_URL` e aplicar as migrations, execute manualmente
+em `backend/`:
+
+```sh
+npm run db:seed:demo
+```
+
+O comando cria dados fictícios de contas, categorias, lançamentos, transferências,
+orçamentos, cartão, faturas e parcelas, recorrências e metas. A sessão é criada
+pelo login normal. Use estas credenciais na tela de login:
+
+- E-mail: `demo@minifinance.local`
+- Senha: `MiniFinance@Demo2026`
+
+O comando recusa `NODE_ENV=production`. Se a conta já existir, encerra sem alterar
+nenhum registro; não há reset automático. Os dados de demonstração são locais e
+fictícios, destinados a desenvolvimento e apresentação.

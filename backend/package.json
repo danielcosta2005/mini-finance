@@ -22,6 +22,7 @@
     "test:coverage": "vitest run --project unit --coverage --reporter=default --reporter=junit --outputFile.junit=test-reports/coverage.xml",
     "db:generate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs generate",
     "db:migrate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs migrate",
+    "db:seed:demo": "node --env-file-if-exists=.env --import tsx src/db/seed-demo.ts",
     "build:test-server": "tsc -p tsconfig.integration.json"
   },
   "overrides": {
