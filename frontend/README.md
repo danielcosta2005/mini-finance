@@ -41,6 +41,14 @@ React usa somente `fetch('/api/health')`, com cookies na mesma origem. O proxy p
 `/api` e o backend atende nesse prefixo. `Set-Cookie` e cookies HttpOnly podem
 atravessar o proxy, sem armazenar tokens no JavaScript.
 
+Para deploy na Vercel, selecione `frontend` como diretório raiz, use o preset
+Vite e configure `BACKEND_URL` com a origem HTTPS do backend, sem barra final,
+em cada ambiente utilizado. `vercel.json` encaminha `/api/*` preservando o
+prefixo e serve `index.html` para as rotas do React Router. O backend precisa
+estar publicado separadamente, com PostgreSQL e `APP_ORIGINS` configurados;
+as URLs de preview também precisam estar autorizadas. `API_PROXY_TARGET` é
+utilizada somente no servidor de desenvolvimento do Vite.
+
 MSW é carregado apenas por `tests/setup.ts`; a aplicação e o Playwright não o
 importam. Os testes de componente verificam sucesso e indisponibilidade da API.
 O E2E verifica `/api/health` pelo proxy e a Home no navegador real, sem mocks.

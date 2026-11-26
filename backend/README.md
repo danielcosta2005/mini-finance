@@ -102,3 +102,20 @@ pelo login normal. Use estas credenciais na tela de login:
 O comando recusa `NODE_ENV=production`. Se a conta já existir, encerra sem alterar
 nenhum registro; não há reset automático. Os dados de demonstração são locais e
 fictícios, destinados a desenvolvimento e apresentação.
+
+## Vercel
+
+Para publicar a API como projeto separado, selecione `backend/` como diretório
+raiz e o preset Hono. `src/index.ts` exporta a aplicação configurada; o servidor
+Node em `src/server.ts` continua sendo usado localmente e no Docker. Configure
+`DATABASE_URL` com PostgreSQL externo e `APP_ORIGINS` com as origens HTTPS exatas
+do frontend. Execute `npm run db:migrate` separadamente antes do primeiro uso.
+Configure `BACKEND_URL` no projeto frontend com a origem HTTPS da API, sem barra
+final. As URLs de preview precisam constar em `APP_ORIGINS`.
+
+A entrada serverless ainda precisa ser verificada em um deploy real. O limite de
+tentativas de autenticação usa memória local e endereço do transporte Node: em
+múltiplas instâncias ou atrás de proxy não é compartilhado por cliente. Avalie
+uma proteção distribuída antes de uso público. O pool PostgreSQL é por instância;
+use pooling do provedor e avalie os limites de conexões. `/api/health` não
+verifica o banco.
