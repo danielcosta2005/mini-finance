@@ -301,26 +301,17 @@ test('todas as páginas cabem nas larguras alvo em tema claro e escuro', async (
         await expect(page.locator('html')).toHaveClass(
           theme === 'dark' ? /dark/ : /^((?!dark).)*$/,
         );
-        if (width < 768) {
-          const openMenu = page.getByRole('button', { name: 'Abrir menu' });
-          await expect(openMenu).toBeVisible();
-          await openMenu.click();
-          await expect(
-            page
-              .getByRole('navigation', { name: 'Navegação principal' })
-              .last(),
-          ).toBeVisible();
-          await page.keyboard.press('Escape');
-        } else {
-          await expect(
-            page.getByRole('button', { name: 'Abrir menu' }),
-          ).toBeHidden();
-          await expect(
-            page
-              .getByRole('navigation', { name: 'Navegação principal' })
-              .first(),
-          ).toBeVisible();
+        const navigation = page.getByRole('navigation', {
+          name: 'Navegação principal',
+        });
+        await expect(navigation).toBeVisible();
+        for (const target of routes) {
+          await expect(navigation.locator(`a[href="${target}"]`)).toBeVisible();
         }
+        await expect(navigation.locator(`a[href="${route}"]`)).toHaveAttribute(
+          'aria-current',
+          'page',
+        );
       }
     }
   }

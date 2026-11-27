@@ -285,8 +285,8 @@ export function ResourcePage<T extends Item>({
   const [formError, setFormError] = useState('');
   const [message, setMessage] = useState('');
   const [actionError, setActionError] = useState<unknown>(null);
-  const newLabel = `${singular.endsWith('a') ? 'Nova' : 'Novo'} ${singular.toLowerCase()}`;
-  const feminine = singular.endsWith('a');
+  const feminine = singular.endsWith('a') || singular.endsWith('ção');
+  const newLabel = `${feminine ? 'Nova' : 'Novo'} ${singular.toLowerCase()}`;
   const query = useQuery({
     queryKey: [path, page, filters],
     queryFn: () => list<T>(path, { page, pageSize: 20, ...filters }),
