@@ -1,5 +1,8 @@
 # MiniFinance
 
+Alunos: Daniel da Cunha Costa e Pedro Luiz Silva
+Matriculas: 2024006064 e 2024006129
+
 Base de uma aplicação web de gestão financeira pessoal, com dois projetos npm
 independentes. Não há npm workspaces, dependências compartilhadas ou ferramentas
 de monorepo. O backend implementa a API de autenticação e gestão financeira;
