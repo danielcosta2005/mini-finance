@@ -244,9 +244,6 @@ a {
   align-items: center;
   gap: 12px;
 }
-.mobile-menu {
-  display: none;
-}
 .user-menu {
   position: relative;
   flex: 0 0 auto;
@@ -396,17 +393,6 @@ a {
   text-align: center;
   text-transform: lowercase;
   white-space: nowrap;
-}
-.mobile-navigation .wordmark {
-  padding: 4px 8px 24px;
-}
-.mobile-navigation {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.mobile-navigation .sidebar-footer {
-  padding: 16px 8px 8px;
 }
 .sheet.left {
   width: min(280px, 100vw);
@@ -937,12 +923,6 @@ textarea {
   }
 }
 @media (max-width: 767px) {
-  .app-shell {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sidebar {
-    display: none;
-  }
   .app-header {
     padding: 0 16px;
     gap: 8px;
@@ -956,12 +936,6 @@ textarea {
   .header-title,
   .header-actions {
     gap: 6px;
-  }
-  .mobile-menu {
-    display: inline-grid;
-    flex: 0 0 32px;
-    width: 32px;
-    height: 32px;
   }
   .user-name,
   .user-menu-trigger > svg {
@@ -984,6 +958,10 @@ textarea {
   }
   .content {
     padding: 16px;
+  }
+  .section-head {
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .two-col {
     grid-template-columns: 1fr;

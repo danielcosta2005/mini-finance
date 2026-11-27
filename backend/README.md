@@ -99,9 +99,11 @@ pelo login normal. Use estas credenciais na tela de login:
 - E-mail: `demo@minifinance.local`
 - Senha: `MiniFinance@Demo2026`
 
-O comando recusa `NODE_ENV=production`. Se a conta já existir, encerra sem alterar
-nenhum registro; não há reset automático. Os dados de demonstração são locais e
-fictícios, destinados a desenvolvimento e apresentação.
+Em produção, o comando exige `ALLOW_PRODUCTION_DEMO_SEED=true`, além de
+`DEMO_EMAIL` e `DEMO_PASSWORD` explícitos. Essas variáveis também permitem
+personalizar as credenciais em outros ambientes. Se a conta já existir, o script
+encerra sem alterar nenhum registro; não há reset automático. Os dados são
+fictícios e destinados a desenvolvimento e apresentação.
 
 ## Vercel
 

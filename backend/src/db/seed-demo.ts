@@ -1,4 +1,5 @@
 import { parseEnvironment } from '../config/env.js';
+import { registerSchema } from '../modules/auth/schemas.js';
 import { passwordHasher } from '../modules/auth/services.js';
 import { systemClock, today as todayInTimeZone } from '../shared/clock.js';
 import { createDatabase } from './client.js';
@@ -19,8 +20,8 @@ import {
   users,
 } from './schema/index.js';
 
-const DEMO_EMAIL = 'demo@minifinance.local';
-const DEMO_PASSWORD = 'MiniFinance@Demo2026';
+const DEMO_EMAIL = process.env.DEMO_EMAIL ?? 'demo@minifinance.local';
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'MiniFinance@Demo2026';
 
 type CategoryKey =
   | 'salary'
@@ -69,9 +70,24 @@ function requiredId(ids: Map<string, string>, key: string) {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('Demo seed is disabled when NODE_ENV=production');
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.ALLOW_PRODUCTION_DEMO_SEED !== 'true'
+  ) {
+    throw new Error('Production demo seed requires explicit authorization');
   }
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (!process.env.DEMO_EMAIL || !process.env.DEMO_PASSWORD)
+  ) {
+    throw new Error('Production demo seed requires explicit credentials');
+  }
+  registerSchema.parse({
+    name: 'Marina Costa (Demo)',
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
+  });
 
   const env = parseEnvironment();
   const { db, pool } = createDatabase(env.DATABASE_URL);
@@ -481,7 +497,6 @@ async function main() {
     }
     console.info('Demo account and financial sample data created.');
     console.info(`Email: ${DEMO_EMAIL}`);
-    console.info(`Password: ${DEMO_PASSWORD}`);
   } finally {
     await pool.end();
   }

@@ -123,3 +123,12 @@ export function createApp(dependencies?: AppDependencies) {
   return app;
 }
 export const app = createApp();
+
+// Vercel detects src/app.ts first. Lazily delegate to the configured app so
+// importing createApp in local tests does not initialize external resources.
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const { default: configuredApp } = await import('./index.js');
+    return configuredApp.fetch(request);
+  },
+};

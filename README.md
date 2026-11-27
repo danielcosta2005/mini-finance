@@ -27,8 +27,8 @@ de vida da API, sem consulta ao banco.
 ## Design e experiência
 
 O frontend usa IBM Plex Sans e tokens CSS em `frontend/src/styles/globals.css`.
-O layout tem sidebar de 240px no desktop, rail de 56px no tablet e navegação em
-Sheet no mobile. O header tem 56px, título alinhado à esquerda, seletor de mês
+O layout tem sidebar de 240px no desktop e barra lateral compacta de 56px no
+tablet e no celular. O header tem 56px, título alinhado à esquerda, seletor de mês
 quando aplicável e menu do usuário com iniciais, tema e saída.
 
 O MiniFinance usa neutros com tom petróleo, um acento para marca, navegação,

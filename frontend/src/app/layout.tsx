@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   ListTree,
   LogOut,
-  Menu,
   Moon,
   Repeat2,
   Sun,
@@ -21,7 +20,6 @@ import { MonthSelector } from '@/components/layout/month-selector';
 import { api } from '@/lib/api';
 import { currentMonth } from '@/lib/format';
 import type { User } from '@/lib/types';
-import { Sheet } from '@/shared/ui/sheet';
 
 const navigation = [
   { to: '/', label: 'Painel', icon: LayoutDashboard },
@@ -34,7 +32,7 @@ const navigation = [
   { to: '/metas', label: 'Metas', icon: Goal },
 ];
 
-function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+function Navigation() {
   return (
     <nav aria-label="Navegação principal" className="nav-list">
       {navigation.map(({ to, label, icon: Icon }) => (
@@ -44,7 +42,6 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
           end={to === '/'}
           aria-label={label}
           title={label}
-          onClick={onNavigate}
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
           <Icon size={18} aria-hidden="true" />
@@ -64,13 +61,7 @@ function initials(name: string): string {
     .join('');
 }
 
-function UserMenu({
-  name,
-  onLogout,
-}: {
-  name: string;
-  onLogout: () => void;
-}) {
+function UserMenu({ name, onLogout }: { name: string; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="user-menu">
@@ -144,7 +135,6 @@ export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const client = useQueryClient();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [month, setMonth] = useState(currentMonth());
   const [theme, setTheme] = useState(
     () => localStorage.getItem('minifinance-theme') ?? 'system',
@@ -191,9 +181,8 @@ export function Layout() {
     }
   }
   function toggleTheme() {
-    const next = (theme === 'dark' || (theme === 'system' && systemDark))
-      ? 'light'
-      : 'dark';
+    const next =
+      theme === 'dark' || (theme === 'system' && systemDark) ? 'light' : 'dark';
     setTheme(next);
     localStorage.setItem('minifinance-theme', next);
   }
@@ -208,42 +197,19 @@ export function Layout() {
       <div className="main-shell">
         <header className="app-header">
           <div className="header-title">
-            <button
-              className="mobile-menu icon-button"
-              type="button"
-              aria-label="Abrir menu"
-              onClick={() => setMobileOpen(true)}
-            >
-              <Menu size={20} aria-hidden="true" />
-            </button>
             <h1>{title}</h1>
           </div>
           <div className="header-actions">
             {location.pathname === '/' && (
               <MonthSelector value={month} onChange={setMonth} />
             )}
-            <UserMenu
-              name={name}
-              onLogout={logout}
-            />
+            <UserMenu name={name} onLogout={logout} />
           </div>
         </header>
         <main className="content">
           <Outlet context={{ month, setMonth }} />
         </main>
       </div>
-      <Sheet
-        open={mobileOpen}
-        onOpenChange={setMobileOpen}
-        title="Navegação"
-        side="left"
-      >
-        <div className="mobile-navigation">
-          <Wordmark />
-          <Navigation onNavigate={() => setMobileOpen(false)} />
-          <ThemeToggle dark={dark} onToggle={toggleTheme} />
-        </div>
-      </Sheet>
     </div>
   );
 }

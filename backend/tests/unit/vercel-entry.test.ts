@@ -10,7 +10,11 @@ describe('Vercel Hono entrypoint', () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('APP_ORIGINS', 'https://example.com');
     vi.stubEnv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/test');
-    const { default: app } = await import('../../src/index.js');
+    const { default: entry } = await import('../../src/app.js');
+    const app = {
+      request: (path: string) =>
+        entry.fetch(new Request(`https://example.com${path}`)),
+    };
     expect((await app.request('/api/health')).status).toBe(200);
     expect((await app.request('/api/accounts')).status).toBe(401);
   }, 15000);
