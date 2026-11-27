@@ -55,7 +55,7 @@ afterEach(() => {
 });
 
 describe('application layout', () => {
-  it('shows the route title once and exposes theme choices in the user menu', async () => {
+  it('shows the route title once and toggles the theme', async () => {
     renderLayout();
 
     expect(
@@ -70,19 +70,18 @@ describe('application layout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Ana Silva/ }));
     expect(screen.getAllByText('Ana Silva')).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Claro' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Escuro' })).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Sistema' })).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Escuro' }));
+    const themeToggle = screen.getByRole('switch', { name: 'Tema escuro' });
+    expect(themeToggle).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(themeToggle);
     await waitFor(() => expect(document.documentElement).toHaveClass('dark'));
+    expect(themeToggle).toHaveAttribute('aria-checked', 'true');
     expect(localStorage.getItem('minifinance-theme')).toBe('dark');
-    fireEvent.click(screen.getByRole('button', { name: 'Claro' }));
+    fireEvent.click(themeToggle);
     await waitFor(() =>
       expect(document.documentElement).not.toHaveClass('dark'),
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Sistema' }));
-    expect(localStorage.getItem('minifinance-theme')).toBe('system');
+    expect(themeToggle).toHaveAttribute('aria-checked', 'false');
+    expect(localStorage.getItem('minifinance-theme')).toBe('light');
   });
 
   it('keeps the dashboard month selector in the header', () => {
